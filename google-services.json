@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "3168379675",
+    "project_id": "open-source-589a4",
+    "storage_bucket": "open-source-589a4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:3168379675:android:b8d27a9f24483d2e3229be",
+        "android_client_info": {
+          "package_name": "com.opentech.simsomgande"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4ygBiESS8eSKJwmmoo-uuD_IjuZeVKAs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

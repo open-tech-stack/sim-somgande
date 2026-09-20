@@ -1,0 +1,4 @@
+[
+  { "id": "g-groupe-musical", "name": "Groupe musical",     "description": "Chorale et instrumentistes" },
+  { "id": "g-protocole",      "name": "Équipe de protocole", "description": "Accueil et placement" }
+]
