@@ -38,10 +38,13 @@ export default function AccueilScreen() {
   const { user } = useAuth();
   const router = useRouter();
 
+  // ⚠️ pageSize: 20 pour couvrir MyProgrammeCard (qui a besoin de
+  //    tous les programmes à venir du mois pour trouver les slots
+  //    de l'utilisateur connecté).
   const programmesQuery = useProgrammes({
     period: 'upcoming',
     page: 1,
-    pageSize: 5,
+    pageSize: 20,
   });
   const evenementsQuery = useEvenements({
     period: 'upcoming',
@@ -56,8 +59,11 @@ export default function AccueilScreen() {
       programmesQuery.refetch();
       evenementsQuery.refetch();
       infosQuery.refetch();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
+    }, [
+      programmesQuery.refetch,
+      evenementsQuery.refetch,
+      infosQuery.refetch,
+    ]),
   );
 
   const nextProgramme = useMemo<Programme | null>(() => {
@@ -118,7 +124,11 @@ export default function AccueilScreen() {
       >
         <HomeHeader />
 
-        <MyProgrammeCard personId={user?.personId ?? null} />
+      
+        <MyProgrammeCard
+          personId={user?.personId ?? null}
+          programmes={programmesQuery.data?.items ?? []}
+        />
 
         <HomeSection
           title="Prochain programme"

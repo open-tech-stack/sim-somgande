@@ -1,11 +1,11 @@
-// src/context/OnboardingContext.tsx
 /**
- * Gère le flag "a déjà vu le welcome".
- * - Au 1er lancement : welcomeSeen = false → on affiche /welcome
- * - Ensuite : welcomeSeen = true → on va direct sur les tabs
+ * Gère l'affichage du Welcome.
+ *
+ * - null  : la valeur n'est pas encore chargée.
+ * - false : le Welcome doit être affiché.
+ * - true  : le Welcome a déjà été vu.
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {
   createContext,
   useCallback,
@@ -15,39 +15,70 @@ import React, {
   useState,
 } from 'react';
 
-const STORAGE_KEY = '@ssi:welcomeSeen';
+import { welcomeStorage } from '@/services/storage.service';
 
 interface OnboardingContextValue {
-  welcomeSeen: boolean | null; // null = pas encore lu
+  welcomeSeen: boolean | null;
   markWelcomeSeen: () => void;
-  resetWelcome: () => void; // utile pour tester
+  resetWelcome: () => void;
 }
 
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
-export function OnboardingProvider({ children }: { children: React.ReactNode }) {
+export function OnboardingProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [welcomeSeen, setWelcomeSeen] = useState<boolean | null>(null);
 
   useEffect(() => {
-    (async () => {
-      const v = await AsyncStorage.getItem(STORAGE_KEY);
-      setWelcomeSeen(v === '1');
-    })();
+    let mounted = true;
+
+    const loadWelcomeState = async () => {
+      try {
+        const seen = await welcomeStorage.get();
+
+        if (mounted) {
+          setWelcomeSeen(seen);
+        }
+      } catch {
+        // En cas d'erreur, on affiche le Welcome par sécurité.
+        if (mounted) {
+          setWelcomeSeen(false);
+        }
+      }
+    };
+
+    void loadWelcomeState();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const markWelcomeSeen = useCallback(() => {
+    // Mise à jour immédiate de l'état local.
     setWelcomeSeen(true);
-    AsyncStorage.setItem(STORAGE_KEY, '1').catch(() => {});
+
+    // Sauvegarde persistante en arrière-plan.
+    void welcomeStorage.setSeen();
   }, []);
 
   const resetWelcome = useCallback(() => {
+    // Utile pendant les tests.
     setWelcomeSeen(false);
-    AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
+
+    void welcomeStorage.reset();
   }, []);
 
-  const value = useMemo(
-    () => ({ welcomeSeen, markWelcomeSeen, resetWelcome }),
-    [welcomeSeen, markWelcomeSeen, resetWelcome]
+  const value = useMemo<OnboardingContextValue>(
+    () => ({
+      welcomeSeen,
+      markWelcomeSeen,
+      resetWelcome,
+    }),
+    [welcomeSeen, markWelcomeSeen, resetWelcome],
   );
 
   return (
@@ -57,9 +88,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   );
 }
 
-export function useOnboarding() {
-  const ctx = useContext(OnboardingContext);
-  if (!ctx)
-    throw new Error('useOnboarding doit être utilisé dans <OnboardingProvider>');
-  return ctx;
+export function useOnboarding(): OnboardingContextValue {
+  const context = useContext(OnboardingContext);
+
+  if (!context) {
+    throw new Error(
+      'useOnboarding doit être utilisé dans <OnboardingProvider>',
+    );
+  }
+
+  return context;
 }

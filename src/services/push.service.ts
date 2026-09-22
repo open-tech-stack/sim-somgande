@@ -9,31 +9,50 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 // ------------------------------------------------------------------
-// Handler global — détermine le comportement en foreground
+// 🆔 ID du canal Android
+//
+// ⚠️ Cet ID DOIT être identique à celui utilisé côté backend
+//    dans `notifications.helper.ts` (ANDROID_CHANNEL_ID).
+// ------------------------------------------------------------------
+export const ANDROID_CHANNEL_ID = 'ssi-default-v2';
+
+// ------------------------------------------------------------------
+// Handler global — comportement en foreground
 // ------------------------------------------------------------------
 export function configureNotificationHandler() {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowBanner: true,
       shouldShowList: true,
-      shouldPlaySound: true,      // 🔊 son
-      shouldSetBadge: true,       // 🔴 badge
+      shouldPlaySound: true,
+      shouldSetBadge: true,
     }),
   });
 }
 
 // ------------------------------------------------------------------
-// Android : crée le canal par défaut avec vibration
+// Android : crée le canal par défaut avec son + vibration
+//
+// ⚠️ SUR ANDROID : `sound: 'default'` N'EST PAS le son système.
+//    Android attend soit `null` (son par défaut du système),
+//    soit le nom d'un fichier audio bundlé (ex: 'notification.wav').
+//
+//    Pour utiliser le son système Android → `sound: null`.
 // ------------------------------------------------------------------
 export async function configureAndroidChannel() {
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'Notifications SSI',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],   // 📳 vibration
-      lightColor: '#2563EB',
-    });
-  }
+  if (Platform.OS !== 'android') return;
+
+  await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL_ID, {
+    name: 'Notifications SSI',
+    importance: Notifications.AndroidImportance.MAX,
+    vibrationPattern: [0, 250, 250, 250],
+    lightColor: '#2563EB',
+    sound: null,           // 🔊 Son système Android
+    enableVibrate: true,   // 📳 Vibration
+    lockscreenVisibility:
+      Notifications.AndroidNotificationVisibility.PUBLIC,
+    bypassDnd: false,
+  });
 }
 
 // ------------------------------------------------------------------
@@ -59,7 +78,7 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
     return null;
   }
 
-  // 2) Canal Android (obligatoire avant le token)
+  // 2) Canal Android (obligatoire AVANT le token)
   await configureAndroidChannel();
 
   // 3) Token
@@ -73,5 +92,14 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
   }
 
   const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+
+  console.log('✅ Expo Push Token:', token);
+
+  // 🔍 Debug : liste les canaux Android actifs
+  if (Platform.OS === 'android') {
+    const channels = await Notifications.getNotificationChannelsAsync();
+    console.log('✅ Canaux Android actifs:', channels);
+  }
+
   return token;
 }

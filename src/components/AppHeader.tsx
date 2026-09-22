@@ -6,7 +6,6 @@
  *
  * Le bouton "user" ouvre un menu déroulant avec :
  *  - nom complet de la personne liée
- *  - code d'accès
  *  - bouton Se déconnecter
  */
 
@@ -70,7 +69,7 @@ export default function AppHeader({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const displayName =
-    user?.fullName?.trim() || (user?.code ? `Code ${user.code}` : 'Utilisateur');
+    user?.fullName?.trim() ||  'Utilisateur';
 
   return (
     <View
@@ -161,12 +160,11 @@ export default function AppHeader({
               open={userMenuOpen}
               onClose={() => setUserMenuOpen(false)}
               displayName={displayName}
-              code={user?.code ?? null}
               onLogout={async () => {
                 setUserMenuOpen(false);
                 await logout();
-              }}
-            />
+              } } 
+              />
           </View>
         </View>
       </View>
@@ -181,13 +179,11 @@ function UserMenu({
   open,
   onClose,
   displayName,
-  code,
   onLogout,
 }: {
   open: boolean;
   onClose: () => void;
   displayName: string;
-  code: string | null;
   onLogout: () => void;
 }) {
   const { colors } = useTheme();
@@ -284,14 +280,6 @@ function UserMenu({
             >
               {displayName}
             </Text>
-            {code && (
-              <Text
-                style={[styles.menuCode, { color: colors.textMuted }]}
-                numberOfLines={1}
-              >
-                Code : {code}
-              </Text>
-            )}
           </View>
         </View>
 
@@ -487,12 +475,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     fontWeight: '800',
     letterSpacing: 0.2,
-  },
-  menuCode: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-    marginTop: 2,
   },
   menuDivider: {
     height: StyleSheet.hairlineWidth,

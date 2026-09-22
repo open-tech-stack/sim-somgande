@@ -1,10 +1,8 @@
 // src/components/home/MyProgrammeCard.tsx
 /**
  * Carte "Mon programme" sur l'accueil.
- *
- * Cherche dans les programmes à venir si le `personId` de l'utilisateur
- * connecté apparaît dans une section. Si oui → affiche les programmes
- * concernés. Sinon → "Vous n'êtes pas au programme".
+  *  - Si l'utilisateur est au programme : liste des sections à venir
+  * - Si l'utilisateur n'est pas au programme : message "aucune tâche assignée"
  */
 
 import {
@@ -17,14 +15,15 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { FontSize, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { useProgrammes } from '@/hooks/useProgrammes';
 import { Programme, ProgrammeSection } from '@/types/programme.types';
 
 const MONTHS_SHORT = [
-  'janv.','févr.','mars','avr.','mai','juin',
-  'juil.','août','sept.','oct.','nov.','déc.',
+  'janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin',
+  'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.',
 ];
-const DAYS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const DAYS = [
+  'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi',
+];
 
 function dayLabel(iso?: string | null): string {
   if (!iso) return '';
@@ -40,20 +39,20 @@ interface MySlot {
 interface Props {
   /** `personId` de l'utilisateur connecté (peut être null) */
   personId: string | null;
+
+  /**
+   * Liste des programmes à venir (reçue du parent).
+   * ⚠️ Le parent doit fournir au moins 20 items pour couvrir
+   *    tous les programmes à venir du mois.
+   */
+  programmes: Programme[];
 }
 
-export default function MyProgrammeCard({ personId }: Props) {
+export default function MyProgrammeCard({ personId, programmes }: Props) {
   const { colors } = useTheme();
-
-  const { data } = useProgrammes({
-    period: 'upcoming',
-    page: 1,
-    pageSize: 20,
-  });
 
   const slots = useMemo<MySlot[]>(() => {
     if (!personId) return [];
-    const programmes = data?.items ?? [];
     const out: MySlot[] = [];
 
     for (const prog of programmes) {
@@ -66,7 +65,7 @@ export default function MyProgrammeCard({ personId }: Props) {
     }
 
     return out;
-  }, [data, personId]);
+  }, [programmes, personId]);
 
   const hasSlot = slots.length > 0;
 
@@ -93,7 +92,11 @@ export default function MyProgrammeCard({ personId }: Props) {
                 },
               ]}
             >
-              <CalendarCheck size={16} color={colors.success} strokeWidth={2.4} />
+              <CalendarCheck
+                size={16}
+                color={colors.success}
+                strokeWidth={2.4}
+              />
             </View>
             <Text style={[styles.tag, { color: colors.success }]}>
               VOUS ÊTES AU PROGRAMME
@@ -112,7 +115,11 @@ export default function MyProgrammeCard({ personId }: Props) {
                   },
                 ]}
               >
-                <CheckCircle2 size={14} color={colors.success} strokeWidth={2.6} />
+                <CheckCircle2
+                  size={14}
+                  color={colors.success}
+                  strokeWidth={2.6}
+                />
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.slotLabel, { color: colors.text }]}>
                     {section.label}
@@ -124,7 +131,10 @@ export default function MyProgrammeCard({ personId }: Props) {
                       strokeWidth={2.2}
                     />
                     <Text
-                      style={[styles.slotMetaText, { color: colors.textSecondary }]}
+                      style={[
+                        styles.slotMetaText,
+                        { color: colors.textSecondary },
+                      ]}
                     >
                       {programme.title}  ·  {dayLabel(programme.startsAt)}
                     </Text>
@@ -156,7 +166,11 @@ export default function MyProgrammeCard({ personId }: Props) {
               { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
             ]}
           >
-            <CalendarDays size={16} color={colors.textMuted} strokeWidth={2.4} />
+            <CalendarDays
+              size={16}
+              color={colors.textMuted}
+              strokeWidth={2.4}
+            />
           </View>
           <Text style={[styles.tag, { color: colors.textMuted }]}>
             MON PROGRAMME
@@ -164,7 +178,7 @@ export default function MyProgrammeCard({ personId }: Props) {
         </View>
 
         <Text style={[styles.emptyTitle, { color: colors.text }]}>
-          Vous n'êtes pas au programme
+          Vous n&apos;êtes pas au programme
         </Text>
         <Text style={[styles.emptySub, { color: colors.textSecondary }]}>
           Aucune tâche ne vous est assignée dans les prochains programmes.

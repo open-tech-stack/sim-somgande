@@ -122,7 +122,7 @@ export default function WelcomeScreen() {
 
   const handleStart = () => {
     markWelcomeSeen();
-    router.replace('/(tabs)');
+    router.replace('/login');
   };
 
   const floatTranslate = float.interpolate({

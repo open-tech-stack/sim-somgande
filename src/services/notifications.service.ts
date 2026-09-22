@@ -20,8 +20,8 @@ export const notificationsService = {
     return data;
   },
 
-  async markRead(id: string): Promise<Notification> {
-    const { data } = await apiClient.patch<Notification>(
+  async markRead(id: string): Promise<{ success: boolean }> {
+    const { data } = await apiClient.patch<{ success: boolean }>(
       ENDPOINTS.notifications.markRead(id),
     );
     return data;

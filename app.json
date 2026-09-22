@@ -7,15 +7,26 @@
     "icon": "./assets/images/icon.png",
     "scheme": "simsomgande",
     "userInterfaceStyle": "automatic",
+    "updates": {
+      "url": "https://u.expo.dev/dbfa1b75-c680-4b61-b58b-56f3a7e9c5c6",
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "ON_LOAD",
+      "enabled": true
+    },
+
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+
     "ios": {
       "icon": "./assets/expo.icon"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#012036",
+        "foregroundImage": "./assets/images/my-logo.png",
+        "backgroundImage": "./assets/images/my-logo.png",
+        "monochromeImage": "./assets/images/logo-monochrome.png"
       },
       "googleServicesFile": "./google-services.json",
       "predictiveBackGestureEnabled": false,
@@ -30,7 +41,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#220E02",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
@@ -38,7 +49,9 @@
       [
         "expo-notifications",
         {
-          "color": "#FFFFFF"
+         "icon": "./assets/images/notification-icon.png",
+          "color": "#F37208", 
+          "sounds": []
         }
       ]
     ],
